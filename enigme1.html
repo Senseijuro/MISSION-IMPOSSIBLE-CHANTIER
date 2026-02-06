@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Épreuve 1 - Les Indices du Saboteur</title>
+  <link rel="stylesheet" href="styles.css">
+  
+  <audio id="bg-music" loop>
+    <source src="enigme_ost.mp3" type="audio/mpeg">
+  </audio>
+</head>
+<body>
+
+  <div class="page-loader" id="page-loader">
+    <div class="loader-content">
+      <div class="loader-logo">
+        <div class="loader-symbols">
+          <span class="loader-symbol circle"></span>
+          <span class="loader-symbol triangle"></span>
+          <span class="loader-symbol square"></span>
+        </div>
+      </div>
+      <div class="loader-text">ÉPREUVE 1 — ÉNIGME</div>
+      <div class="loader-bar">
+        <div class="loader-progress"></div>
+      </div>
+      <div class="loader-status">Analyse des indices...</div>
+    </div>
+  </div>
+
+  <header class="header">
+    <a href="#" class="back-btn" id="back-btn">← Retour</a>
+    <div class="header-center">
+      <span class="page-badge">ÉPREUVE 1</span>
+    </div>
+    <div class="header-right"></div>
+  </header>
+
+  <main class="game-page">
+    <div class="game-container game-container-wide">
+      <div class="game-header">
+        <div class="game-icon-large">🔍</div>
+        <h1 class="purple">LES INDICES DU SABOTEUR</h1>
+        <p>Déchiffrez les codes laissés par le saboteur pour accéder au chantier</p>
+      </div>
+
+      <div class="game-content">
+        <div class="game-layout-split" id="enigme1-layout" style="display: grid;">
+          <div class="game-col-left">
+            <div class="mission-briefing-box scenario-theme height-match">
+              <div class="briefing-box-header">
+                <span class="briefing-box-icon">🔐</span>
+                <h3>BRIEFING DE MISSION</h3>
+                <span class="briefing-box-tag">ÉPREUVE 1</span>
+              </div>
+              
+              <div class="briefing-box-content">
+                <div class="mission-context">
+                  <h4>🚨 SITUATION D'URGENCE</h4>
+                  <p>
+                    Le saboteur a verrouillé l'accès au chantier avec un <strong>code secret</strong>. 
+                    Il a laissé des indices cryptiques sur les murs. Vous devez les déchiffrer 
+                    pour entrer et commencer l'intervention.
+                  </p>
+                </div>
+
+                <div class="mission-objective">
+                  <h4>🧩 LES CODES À TROUVER</h4>
+                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
+                    <strong>CODE 1</strong><br>
+                    <em>"Je suis une grosse machine jaune avec un bras.<br>
+                    Je creuse des trous pour les fondations.<br>
+                    Qui suis-je ?"</em><br>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
+                    <strong>CODE 2</strong><br>
+                    <em>"Je protège ta tête sur le chantier.<br>
+                    Je suis obligatoire pour entrer.<br>
+                    Qui suis-je ?"</em><br>
+                  </div>
+                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
+                    <strong>CODE 3</strong><br>
+                    <em>"Je suis un vêtement orange ou jaune fluo.<br>
+                    Je te rends visible de loin.<br>
+                    Qui suis-je ?"</em><br>
+                  </div>
+                </div>
+
+                <div class="mission-rules">
+                  <h4>📜 RÈGLES D'ENGAGEMENT</h4>
+                  <ul>
+                    <li><span class="rule-icon">⏱️</span> Résolvez les énigmes dans le temps imparti</li>
+                    <li><span class="rule-icon">🤝</span> Collaborez avec votre équipe</li>
+                    <li><span class="rule-icon">🚫</span> Quitter la page = Mission échouée</li>
+                    <li><span class="rule-icon">💡</span> Indices disponibles auprès du gérant</li>
+                  </ul>
+                </div>
+
+                <div class="mission-reward">
+                  <h4>🎁 RÉCOMPENSE</h4>
+                  <div class="reward-preview">
+                    <span class="reward-icon-box">🎁</span>
+                    <div class="reward-details">
+                      <strong>Récompense mystère</strong>
+                      <span>À découvrir dans le coffre</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="game-col-right">
+            <div class="game-content-inner height-match">
+              <div class="timer-section-centered">
+                <div class="warning-box" id="warning-box">
+                  <span class="warning-icon">⚠️</span>
+                  <p>Une fois le timer lancé, si vous quittez la page, l'épreuve sera automatiquement échouée !</p>
+                </div>
+
+                <div class="timer-container">
+                  <div class="timer-display">
+                    <span class="timer-num" id="timer-min">05</span>
+                    <span class="timer-sep">:</span>
+                    <span class="timer-num" id="timer-sec">00</span>
+                  </div>
+                  <span class="timer-label">TEMPS RESTANT</span>
+                </div>
+
+                <button class="btn-primary" id="btn-start">DÉMARRER LE TIMER</button>
+
+                <div class="validation-container hidden" id="validation">
+                  <div class="validation-box">
+                    <h3>⏱️ Temps écoulé !</h3>
+                    <p>Avez-vous trouvé les 3 réponses ?</p>
+                    <div class="validation-btns">
+                      <button class="btn-success" id="btn-yes">OUI, RÉUSSI</button>
+                      <button class="btn-fail" id="btn-no">NON, ÉCHOUÉ</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="result-container-full hidden" id="result">
+          <div class="result-box" id="result-box">
+            <div class="result-icon" id="result-icon"></div>
+            <h3 id="result-title"></h3>
+            <p id="result-text"></p>
+            <a href="quiz.html" class="btn-primary">CONTINUER →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="loader.js"></script>
+  <script src="gameState.js"></script>
+  <script src="enigme1.js"></script>
+  <script src="music.js"></script>
+</body>
+</html>
