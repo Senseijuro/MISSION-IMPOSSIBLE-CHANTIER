@@ -3,18 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coffre Final - Recompenses</title>
+  <title>Coffre-Fort - Récompenses</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/jpeg" href="favicon.jpeg">
-  
-  <!-- Musique conditionnelle -->
   <audio id="bg-music" loop>
     <source src="coffre_win.mp3" type="audio/mpeg">
   </audio>
 </head>
 <body>
 
-  <!-- LOADER -->
   <div class="page-loader" id="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
@@ -24,18 +21,16 @@
           <span class="loader-symbol square"></span>
         </div>
       </div>
-      <div class="loader-text">COFFRE FINAL</div>
-      <div class="loader-bar">
-        <div class="loader-progress"></div>
-      </div>
-      <div class="loader-status">Ouverture du coffre...</div>
+      <div class="loader-text">COFFRE-FORT</div>
+      <div class="loader-bar"><div class="loader-progress"></div></div>
+      <div class="loader-status">Déverrouillage du coffre-fort...</div>
     </div>
   </div>
 
   <header class="header">
     <a href="#" class="back-btn" id="back-btn">Retour</a>
     <div class="header-center">
-      <span class="page-badge gold">COFFRE FINAL</span>
+      <span class="page-badge gold">COFFRE-FORT</span>
     </div>
     <div class="header-right"></div>
   </header>
@@ -44,25 +39,25 @@
     <div class="game-container">
       <div class="game-header">
         <div class="game-icon-large">🏆</div>
-        <h1 class="gold">COFFRE FINAL</h1>
-        <p>Recuperez vos recompenses validees</p>
+        <h1 class="gold">COFFRE-FORT DIGITAL</h1>
+        <p>Récupérez vos récompenses débloquées</p>
       </div>
 
       <div class="game-content">
         <div class="coffre-progress">
           <div class="progress-item" id="prog-enigme1">
             <div class="progress-circle">1</div>
-            <span>Indices</span>
+            <span>Dangers</span>
           </div>
           <div class="progress-line"></div>
           <div class="progress-item" id="prog-quiz">
             <div class="progress-circle">2</div>
-            <span>Quiz BTP</span>
+            <span>EPI</span>
           </div>
           <div class="progress-line"></div>
           <div class="progress-item" id="prog-enigma">
             <div class="progress-circle">3</div>
-            <span>Gardiens</span>
+            <span>Ordre</span>
           </div>
         </div>
 
@@ -71,31 +66,28 @@
             <div class="reward-icon">🎁</div>
             <div class="reward-info">
               <h3>Récompense n°1</h3>
-              <span class="reward-link">Épreuve 1 - Les Indices du Saboteur</span>
+              <span class="reward-link">Épreuve 1 - Dangers du Chantier</span>
             </div>
             <div class="reward-status" id="status-enigme1">Verrouillé</div>
           </div>
-
           <div class="reward-card" id="reward-quiz" data-game="quiz">
             <div class="reward-icon">🎁</div>
             <div class="reward-info">
               <h3>Récompense n°2</h3>
-              <span class="reward-link">Épreuve 2 - Test de Qualification</span>
+              <span class="reward-link">Épreuve 2 - Trouve l'EPI</span>
             </div>
             <div class="reward-status" id="status-quiz">Verrouillé</div>
           </div>
-
           <div class="reward-card" id="reward-enigma" data-game="enigma">
             <div class="reward-icon">🎁</div>
             <div class="reward-info">
               <h3>Récompense n°3</h3>
-              <span class="reward-link">Épreuve 3 - Les Gardiens du Chantier</span>
+              <span class="reward-link">Épreuve 3 - Le Bon Ordre</span>
             </div>
             <div class="reward-status" id="status-enigma">Verrouillé</div>
           </div>
         </div>
 
-        <!-- Message zone suivante (affiché quand toutes les épreuves sont terminées) -->
         <div class="next-zone-box hidden" id="next-zone">
           <div class="next-zone-content">
             <span class="next-zone-icon" id="next-zone-icon">🎉</span>
@@ -105,7 +97,7 @@
               <span class="direction-icon">➡️</span>
               <div class="direction-info">
                 <strong>PROCHAINE ÉTAPE</strong>
-                <p>Rendez-vous à la <span class="zone-name">ZONE MÉCANIQUE</span></p>
+                <p>Rendez-vous à la <span class="zone-name">ZONE HIPPIQUE</span></p>
               </div>
             </div>
             <p class="next-zone-instruction">Présentez-vous au stand pour recevoir vos récompenses et continuer l'aventure !</p>
@@ -120,8 +112,8 @@
   <div class="modal" id="modal-success">
     <div class="modal-content success">
       <div class="modal-icon">OK</div>
-      <h3>FELICITATIONS !</h3>
-      <p>Signalez au gerant que vous avez reussi.<br>Vous pouvez recevoir vos prix et continuer.</p>
+      <h3>RÉCOMPENSE DÉBLOQUÉE !</h3>
+      <p>Signalez au maître du jeu que vous avez réussi.<br>Vous pouvez recevoir vos prix et continuer.</p>
       <button class="btn-primary" id="btn-close-success">CONTINUER</button>
     </div>
   </div>
@@ -129,8 +121,8 @@
   <div class="modal" id="modal-fail">
     <div class="modal-content fail">
       <div class="modal-icon">X</div>
-      <h3>RECOMPENSE VERROUILLEE</h3>
-      <p id="fail-message">Vous devez reussir l'epreuve pour debloquer cette recompense.</p>
+      <h3>RÉCOMPENSE VERROUILLÉE</h3>
+      <p id="fail-message">Vous devez réussir l'épreuve pour débloquer ce programme.</p>
       <button class="btn-primary" id="btn-close-fail">COMPRIS</button>
     </div>
   </div>
@@ -141,6 +133,7 @@
 
   <script src="loader.js"></script>
   <script src="gameState.js"></script>
+  <script src="globalTimer.js"></script>
   <script src="coffre.js"></script>
   <script src="music.js"></script>
 </body>

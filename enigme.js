@@ -1,130 +1,125 @@
 document.addEventListener('DOMContentLoaded', function() {
   var state = getGameState();
-  var timeLeft = 60;
-  var timerInterval = null;
-  var timerRunning = false;
-  var hasValidated = false;
-
   var locked = document.getElementById('locked');
-  var timerMin = document.getElementById('timer-min');
-  var timerSec = document.getElementById('timer-sec');
-  var btnStart = document.getElementById('btn-start');
-  var validation = document.getElementById('validation');
-  var result = document.getElementById('result');
-  var warningBox = document.getElementById('warning-box');
-  var backBtn = document.getElementById('back-btn');
-  var btnYes = document.getElementById('btn-yes');
-  var btnNo = document.getElementById('btn-no');
-  var enigmaLayout = document.getElementById('enigma-layout');
-  var timerContainer = document.querySelector('.timer-container');
+  var gameArea = document.getElementById('game-area');
+  var resultDiv = document.getElementById('result');
+  var grid = document.getElementById('ordre-grid');
+  var progressEl = document.getElementById('ord-progress');
+  var errorsEl = document.getElementById('ord-errors');
+  var nextStepEl = document.getElementById('ord-next-step');
 
-  updateTimerDisplay(timerMin, timerSec, timeLeft);
-
-  // Vérifier si débloqué (après Quiz)
+  // Vérifier débloqué
   if (!state.quiz || state.quiz.completed === null) {
-    hasValidated = true;
     if (locked) locked.classList.remove('hidden');
-    if (enigmaLayout) enigmaLayout.classList.add('hidden');
-    
-    if (backBtn) {
-      backBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'index.html';
-      });
-    }
+    if (gameArea) gameArea.classList.add('hidden');
     return;
   }
 
   // Si déjà terminé
   if (state.enigma && state.enigma.completed !== null) {
-    hasValidated = true;
-    if (enigmaLayout) enigmaLayout.classList.add('hidden');
+    if (gameArea) gameArea.classList.add('hidden');
     if (locked) locked.classList.add('hidden');
-    showResult(state.enigma.completed);
-    
-    if (backBtn) {
-      backBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'index.html';
-      });
-    }
+    showResult(state.enigma.completed, 0);
     return;
   }
 
-  // S'assurer que le layout est visible
   if (locked) locked.classList.add('hidden');
-  if (enigmaLayout) {
-    enigmaLayout.classList.remove('hidden');
-    enigmaLayout.style.display = 'grid';
-  }
 
-  // Quitter via bouton retour = ÉCHOUÉ (seulement si timer en cours)
-  if (backBtn) {
-    backBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      if (!hasValidated && timerRunning) {
-        if (!state.enigma) state.enigma = { completed: null };
-        state.enigma.completed = false;
-        saveGameState(state);
-        alert('⚠️ Vous avez quitté l\'épreuve. Mission échouée !');
-      }
-      window.location.href = 'index.html';
-    });
-  }
+  // 8 étapes dans l'ordre CORRECT de construction
+  var steps = [
+    { order: 1, emoji: '📐', name: 'Étude du terrain',     job: 'Géomètre' },
+    { order: 2, emoji: '🕳️', name: 'Terrassement',        job: 'Terrassier' },
+    { order: 3, emoji: '🏗️', name: 'Fondations',          job: 'Maçon' },
+    { order: 4, emoji: '🧱', name: 'Murs porteurs',        job: 'Maçon' },
+    { order: 5, emoji: '🪵', name: 'Charpente',            job: 'Charpentier' },
+    { order: 6, emoji: '🏠', name: 'Toiture',              job: 'Couvreur' },
+    { order: 7, emoji: '⚡', name: 'Électricité & Plomberie', job: 'Électricien / Plombier' },
+    { order: 8, emoji: '🎨', name: 'Finitions & Peinture', job: 'Peintre' }
+  ];
 
-  // Quitter via fermeture/navigation = ÉCHOUÉ (seulement si timer en cours)
-  window.addEventListener('beforeunload', function() {
-    if (!hasValidated && timerRunning) {
-      if (!state.enigma) state.enigma = { completed: null };
-      state.enigma.completed = false;
-      saveGameState(state);
-    }
+  // Mélanger l'affichage (pas l'ordre logique)
+  var displayOrder = getShuffledOrder('enigma', steps.length);
+  var shuffledDisplay = displayOrder.map(function(i) { return steps[i]; });
+
+  var currentStep = 1; // On cherche l'étape 1 d'abord
+  var errorCount = 0;
+  var total = steps.length;
+
+  // Créer les tuiles
+  shuffledDisplay.forEach(function(step, index) {
+    var el = document.createElement('div');
+    el.className = 'ordre-tile';
+    el.dataset.order = step.order;
+    el.dataset.index = index;
+    el.innerHTML =
+      '<div class="ordre-tile-num" id="num-' + index + '">' + '?' + '</div>' +
+      '<span class="ordre-tile-emoji">' + step.emoji + '</span>' +
+      '<div class="ordre-tile-info">' +
+        '<span class="ordre-tile-name">' + step.name + '</span>' +
+        '<span class="ordre-tile-job">' + step.job + '</span>' +
+      '</div>';
+    el.addEventListener('click', function() { selectTile(el, step); });
+    grid.appendChild(el);
   });
 
-  function scrollToValidation() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (timerContainer) {
-      setTimeout(function() {
-        timerContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 300);
+  function updateStats() {
+    if (progressEl) progressEl.textContent = '🏗️ ' + (currentStep - 1) + ' / ' + total + ' étapes';
+    if (errorsEl) errorsEl.textContent = '❌ ' + errorCount + ' erreur' + (errorCount > 1 ? 's' : '');
+  }
+
+  function updateNextStep() {
+    if (nextStepEl) {
+      if (currentStep <= total) {
+        nextStepEl.textContent = 'Étape ' + currentStep + ' — Que fait-on maintenant ?';
+      } else {
+        nextStepEl.textContent = 'Toutes les étapes trouvées !';
+      }
     }
   }
 
-  function startTimer() {
-    if (timerRunning) return;
-    timerRunning = true;
-    if (btnStart) { btnStart.disabled = true; btnStart.textContent = 'EN COURS...'; }
-    if (warningBox) warningBox.classList.add('active');
+  function selectTile(el, step) {
+    if (el.classList.contains('locked')) return;
 
-    timerInterval = setInterval(function() {
-      timeLeft--;
-      updateTimerDisplay(timerMin, timerSec, timeLeft);
-      if (timeLeft <= 0) {
-        clearInterval(timerInterval);
-        timerRunning = false;
-        if (btnStart) btnStart.textContent = 'TERMINÉ';
-        if (warningBox) warningBox.classList.add('hidden');
-        if (validation) validation.classList.remove('hidden');
-        scrollToValidation();
+    if (step.order === currentStep) {
+      // Correct !
+      el.classList.add('locked');
+      var numEl = el.querySelector('.ordre-tile-num');
+      if (numEl) numEl.textContent = step.order;
+      currentStep++;
+      updateStats();
+      updateNextStep();
+
+      if (currentStep > total) {
+        endGame();
       }
-    }, 1000);
+    } else {
+      // Mauvais
+      errorCount++;
+      el.classList.add('wrong-pick');
+      setTimeout(function() { el.classList.remove('wrong-pick'); }, 500);
+      updateStats();
+
+      // 4 erreurs = perdu
+      if (errorCount >= 4) {
+        endGame();
+      }
+    }
   }
 
-  function validate(success) {
-    hasValidated = true;
+  function endGame() {
+    var success = (currentStep > total) && errorCount < 4;
     if (!state.enigma) state.enigma = { completed: null };
     state.enigma.completed = success;
-    timerRunning = false;
-    if (timerInterval) clearInterval(timerInterval);
     saveGameState(state);
-    if (validation) validation.classList.add('hidden');
-    if (enigmaLayout) enigmaLayout.classList.add('hidden');
-    showResult(success);
+    setTimeout(function() {
+      if (gameArea) gameArea.classList.add('hidden');
+      showResult(success, currentStep - 1);
+    }, 600);
   }
 
-  function showResult(success) {
-    if (result) result.classList.remove('hidden');
-    if (enigmaLayout) enigmaLayout.classList.add('hidden');
+  function showResult(success, stepsFound) {
+    if (resultDiv) resultDiv.classList.remove('hidden');
+    if (gameArea) gameArea.classList.add('hidden');
     if (locked) locked.classList.add('hidden');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -132,21 +127,25 @@ document.addEventListener('DOMContentLoaded', function() {
     var resultIcon = document.getElementById('result-icon');
     var resultTitle = document.getElementById('result-title');
     var resultText = document.getElementById('result-text');
+    var resultScore = document.getElementById('result-score');
+
+    if (resultScore) resultScore.textContent = stepsFound + ' / ' + total + ' étapes trouvées';
 
     if (success) {
       if (resultBox) resultBox.classList.add('success');
       if (resultIcon) resultIcon.textContent = '✓';
-      if (resultTitle) resultTitle.textContent = 'ÉPREUVE RÉUSSIE !';
-      if (resultText) resultText.textContent = 'Bravo ! Vous avez débloqué une récompense dans le coffre.';
+      if (resultTitle) resultTitle.textContent = 'MAISON CONSTRUITE !';
+      if (resultText) resultText.textContent = 'Tu connais l\'ordre de construction d\'une maison. Dernière récompense débloquée !';
     } else {
       if (resultBox) resultBox.classList.add('fail');
       if (resultIcon) resultIcon.textContent = '✗';
-      if (resultTitle) resultTitle.textContent = 'ÉPREUVE ÉCHOUÉE';
-      if (resultText) resultText.textContent = 'Dommage ! La récompense reste verrouillée.';
+      if (resultTitle) resultTitle.textContent = 'CHANTIER STOPPÉ';
+      if (resultText) resultText.textContent = errorCount >= 4
+        ? 'Trop d\'erreurs ! Le chef de chantier a arrêté les travaux. Récompense verrouillée.'
+        : 'Il fallait trouver toutes les étapes dans le bon ordre. Récompense verrouillée.';
     }
   }
 
-  if (btnStart) btnStart.addEventListener('click', startTimer);
-  if (btnYes) btnYes.addEventListener('click', function() { validate(true); });
-  if (btnNo) btnNo.addEventListener('click', function() { validate(false); });
+  updateStats();
+  updateNextStep();
 });

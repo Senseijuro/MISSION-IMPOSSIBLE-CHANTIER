@@ -3,18 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Épreuve 3 - Les Gardiens du Chantier</title>
+  <title>Épreuve 3 - Le Bon Ordre</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" type="image/jpeg" href="favicon.jpeg">
-  
-  <!-- Musique de fond -->
   <audio id="bg-music" loop>
     <source src="enigme2_ost.mp3" type="audio/mpeg">
   </audio>
+  <style>
+    .ordre-game { padding: 1rem 0; }
+    .ordre-score-bar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1rem; background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem;
+    }
+    .ordre-progress { color: var(--cyan); font-weight: 600; }
+    .ordre-errors { color: var(--red); font-weight: 600; }
+
+    .ordre-instruction {
+      text-align: center; padding: 0.8rem 1rem; margin-bottom: 1rem;
+      background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.3);
+      border-radius: 12px;
+    }
+    .ordre-instruction-text { font-size: 0.85rem; color: var(--gray-light); }
+    .ordre-instruction-step {
+      display: block; margin-top: 0.4rem; font-size: 1.1rem; font-weight: 700; color: var(--pink);
+    }
+
+    .ordre-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+      max-width: 500px; margin: 0 auto 1rem;
+    }
+    .ordre-tile {
+      display: flex; align-items: center; gap: 0.8rem;
+      padding: 1rem; background: rgba(255,255,255,0.03);
+      border: 2px solid var(--border); border-radius: 14px;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .ordre-tile:hover { border-color: var(--cyan); background: rgba(0,212,255,0.05); transform: translateY(-2px); }
+    .ordre-tile-emoji { font-size: 1.8rem; flex-shrink: 0; }
+    .ordre-tile-info { flex: 1; }
+    .ordre-tile-name { display: block; font-size: 0.85rem; font-weight: 600; color: var(--white); }
+    .ordre-tile-job { display: block; font-size: 0.7rem; color: var(--gray); margin-top: 0.15rem; }
+
+    .ordre-tile-num {
+      width: 28px; height: 28px; border-radius: 50%; display: flex;
+      align-items: center; justify-content: center; font-weight: 700; font-size: 0.8rem;
+      background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: var(--gray);
+      flex-shrink: 0;
+    }
+
+    .ordre-tile.locked {
+      border-color: var(--green); background: rgba(0,255,136,0.08);
+      pointer-events: none; transform: scale(1.02);
+    }
+    .ordre-tile.locked .ordre-tile-num {
+      background: var(--green); border-color: var(--green); color: #000;
+    }
+    .ordre-tile.locked .ordre-tile-name { color: var(--green); }
+
+    .ordre-tile.wrong-pick {
+      border-color: var(--red) !important; background: rgba(255,68,68,0.15) !important;
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+
+    .ordre-hint { text-align: center; color: var(--gray); font-size: 0.8rem; }
+
+    @media(max-width:450px) {
+      .ordre-grid { grid-template-columns: 1fr; max-width: 350px; }
+      .ordre-tile { padding: 0.8rem; }
+      .ordre-tile-emoji { font-size: 1.5rem; }
+      .ordre-tile-name { font-size: 0.8rem; }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- LOADER -->
   <div class="page-loader" id="page-loader">
     <div class="loader-content">
       <div class="loader-logo">
@@ -24,16 +89,14 @@
           <span class="loader-symbol square"></span>
         </div>
       </div>
-      <div class="loader-text">ÉPREUVE 3 — ÉNIGME FINALE</div>
-      <div class="loader-bar">
-        <div class="loader-progress"></div>
-      </div>
-      <div class="loader-status">Préparation de la mission...</div>
+      <div class="loader-text">ÉPREUVE 3 — LE BON ORDRE</div>
+      <div class="loader-bar"><div class="loader-progress"></div></div>
+      <div class="loader-status">Préparation du chantier...</div>
     </div>
   </div>
 
   <header class="header">
-    <a href="#" class="back-btn" id="back-btn">← Retour</a>
+    <a href="index.html" class="back-btn" id="back-btn">← Retour</a>
     <div class="header-center">
       <span class="page-badge">ÉPREUVE 3</span>
     </div>
@@ -43,120 +106,35 @@
   <main class="game-page">
     <div class="game-container game-container-wide">
       <div class="game-header">
-        <div class="game-icon-large">🧩</div>
-        <h1 class="pink">LES GARDIENS DU CHANTIER</h1>
-        <p>Déchiffrez les 3 énigmes pour identifier les métiers qui sauveront la Tour</p>
+        <div class="game-icon-large">🏗️</div>
+        <h1 class="pink">LE BON ORDRE</h1>
+        <p>Clique sur les étapes de construction dans le bon ordre chronologique !</p>
       </div>
 
       <div class="game-content">
-        <!-- VERROUILLÉ -->
         <div class="locked-container hidden" id="locked">
           <div class="locked-box">
             <span class="lock-icon">🔒</span>
             <h3>Épreuve verrouillée</h3>
-            <p>Terminez d'abord le quiz pour débloquer l'énigme finale.</p>
-            <a href="quiz.html" class="btn-primary">ALLER AU QUIZ</a>
+            <p>Termine d'abord l'épreuve 2 pour débloquer celle-ci.</p>
+            <a href="quiz.html" class="btn-primary">ALLER À L'ÉPREUVE 2</a>
           </div>
         </div>
 
-        <div class="game-layout-split" id="enigma-layout" style="display: grid;">
-          <div class="game-col-left">
-            <div class="mission-briefing-box height-match">
-              <div class="briefing-box-header">
-                <span class="briefing-box-icon">📋</span>
-                <h3>BRIEFING DE MISSION</h3>
-                <span class="briefing-box-tag">ÉPREUVE 3</span>
-              </div>
-              
-              <div class="briefing-box-content">
-                <div class="mission-context">
-                  <h4>📍 MESSAGE DU SABOTEUR</h4>
-                  <p>
-                    Le saboteur a laissé un <strong>message</strong> sur le mur du chantier :
-                  </p>
-                  <blockquote style="background: rgba(255,107,107,0.1); border-left: 3px solid #ff6b6b; padding: 1rem; margin: 1rem 0; font-style: italic;">
-                    "3 métiers peuvent sauver la tour. Trouve-les !"
-                  </blockquote>
-                </div>
-
-                <div class="mission-objective">
-                  <h4>🧩 LES 3 ÉNIGMES À RÉSOUDRE</h4>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
-                    <strong>ÉNIGME 1</strong><br>
-                    <em>"Je construis les murs avec des briques et du ciment.<br>
-                    J'utilise une truelle pour étaler le mortier.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px; margin-bottom: 0.8rem;">
-                    <strong>ÉNIGME 2</strong><br>
-                    <em>"Je m'occupe des câbles et des prises.<br>
-                    Grâce à moi, la lumière s'allume.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                  <div style="background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 8px;">
-                    <strong>ÉNIGME 3</strong><br>
-                    <em>"Je répare les fuites d'eau.<br>
-                    J'installe les robinets et les douches.<br>
-                    Qui suis-je ?"</em><br>
-                  </div>
-                </div>
-
-                <div class="mission-rules">
-                  <h4>📜 RÈGLES D'ENGAGEMENT</h4>
-                  <ul>
-                    <li><span class="rule-icon">⏱️</span> Résolvez les énigmes dans le temps imparti</li>
-                    <li><span class="rule-icon">🤝</span> Collaborez avec votre équipe</li>
-                    <li><span class="rule-icon">🚫</span> Quitter la page = Mission échouée</li>
-                    <li><span class="rule-icon">💡</span> Indices disponibles auprès du gérant</li>
-                  </ul>
-                </div>
-
-                <div class="mission-reward">
-                  <h4>🎁 RÉCOMPENSE</h4>
-                  <div class="reward-preview">
-                    <span class="reward-icon-box">🎁</span>
-                    <div class="reward-details">
-                      <strong>Récompense mystère</strong>
-                      <span>À découvrir dans le coffre</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div id="game-area" class="ordre-game">
+          <div class="ordre-score-bar">
+            <span class="ordre-progress" id="ord-progress">🏗️ 0 / 8 étapes</span>
+            <span class="ordre-errors" id="ord-errors">❌ 0 erreur</span>
           </div>
 
-          <div class="game-col-right">
-            <div class="game-content-inner height-match">
-              <div class="timer-section-centered">
-                <div class="warning-box" id="warning-box">
-                  <span class="warning-icon">⚠️</span>
-                  <p>Une fois le timer lancé, si vous quittez la page, l'épreuve sera automatiquement échouée !</p>
-                </div>
-
-                <div class="timer-container">
-                  <div class="timer-display">
-                    <span class="timer-num" id="timer-min">05</span>
-                    <span class="timer-sep">:</span>
-                    <span class="timer-num" id="timer-sec">00</span>
-                  </div>
-                  <span class="timer-label">TEMPS RESTANT</span>
-                </div>
-
-                <button class="btn-primary" id="btn-start">DÉMARRER LE TIMER</button>
-
-                <div class="validation-container hidden" id="validation">
-                  <div class="validation-box">
-                    <h3>⏱️ Temps écoulé !</h3>
-                    <p>Avez-vous résolu l'énigme ?</p>
-                    <div class="validation-btns">
-                      <button class="btn-success" id="btn-yes">OUI, RÉUSSI</button>
-                      <button class="btn-fail" id="btn-no">NON, ÉCHOUÉ</button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div class="ordre-instruction">
+            <span class="ordre-instruction-text">Prochaine étape à trouver :</span>
+            <span class="ordre-instruction-step" id="ord-next-step">Étape 1 — ???</span>
           </div>
+
+          <div class="ordre-grid" id="ordre-grid"></div>
+
+          <p class="ordre-hint">Clique sur l'étape qui vient en <strong>premier</strong> dans la construction d'une maison</p>
         </div>
 
         <div class="result-container-full hidden" id="result">
@@ -164,7 +142,8 @@
             <div class="result-icon" id="result-icon"></div>
             <h3 id="result-title"></h3>
             <p id="result-text"></p>
-            <a href="coffre.html" class="btn-primary btn-gold">🏆 VOIR LE COFFRE</a>
+            <p class="result-score" id="result-score"></p>
+            <a href="coffre.html" class="btn-primary btn-gold">🏆 VOIR LE COFFRE-FORT</a>
           </div>
         </div>
       </div>
@@ -173,6 +152,7 @@
 
   <script src="loader.js"></script>
   <script src="gameState.js"></script>
+  <script src="globalTimer.js"></script>
   <script src="enigme.js"></script>
   <script src="music.js"></script>
 </body>
